@@ -1,10 +1,11 @@
 ﻿using System.Text;
-using System.Text.Json;
+using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using File = System.IO.File;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace JustAnotherRating;
 
@@ -68,6 +69,7 @@ class Program
         else if (messageText.StartsWith("/game"))
         {
             await ProcessGame(chatId, messageText, cancellationToken);
+            SaveRatings();
         }
         else if (messageText.StartsWith("/info"))
         {
@@ -184,7 +186,7 @@ class Program
     {
         try
         {
-            var json = JsonSerializer.Serialize(ChatRatings);
+            var json = JsonConvert.SerializeObject(ChatRatings);
             File.WriteAllText(DataFilePath, json);
         }
         catch (Exception ex)
@@ -201,7 +203,7 @@ class Program
                 return new Dictionary<long, Ratings>();
 
             var json = File.ReadAllText(DataFilePath);
-            return JsonSerializer.Deserialize<Dictionary<long, Ratings>>(json) ??
+            return JsonConvert.DeserializeObject<Dictionary<long, Ratings>>(json) ??
                    new Dictionary<long, Ratings>();
         }
         catch (Exception ex)
